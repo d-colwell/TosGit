@@ -26,5 +26,6 @@ namespace TosGit
         public string BranchFolderName => "Branches";
         public string BranchPropertyName => "OriginBranch";
         public string RepoNameProperty => "RepoName";
+        public string SourceItemProperty => "SourceItemID";
     }
 }

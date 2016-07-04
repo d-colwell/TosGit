@@ -58,6 +58,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="GitRepoConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\CopyToBranchTask.cs" />
     <Compile Include="Tasks\Project\SyncWithRepositoryTask.cs" />
     <Compile Include="Tasks\Project\LinkToRepositoryTask.cs" />
     <Compile Include="TosGitAddOn.cs" />
