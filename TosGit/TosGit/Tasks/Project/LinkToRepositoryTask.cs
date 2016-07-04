@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
-using LibGit2Sharp;
 
 namespace TosGit.Tasks.Project
 {
@@ -38,15 +37,27 @@ namespace TosGit.Tasks.Project
                 prop.Name = Config.Instance.RepoPasswordProperty;
                 prop.Value = string.Empty;
             }
+            if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoNameProperty))
+            {
+                var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                prop.Name = Config.Instance.RepoNameProperty;
+                prop.Value = string.Empty;
+            }
 
             SetRepoProperties(project, taskContext);
 
-            using (var repo = new Repository(project.GetPropertyValue(Config.Instance.RepoProperty)))
+            var repoConnector = new GitRepoConnector(project.GetPropertyValue(Config.Instance.RepoProperty), project.GetPropertyValue(Config.Instance.RepoUserProperty), project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
+            if(!repoConnector.TestConnection())
             {
-                foreach (var branch in repo.Branches)
-                {
-                }
+                taskContext.ShowWarningMessage("Could not connect", "Unable to connect to repository using credentials provided. Please try again.");
+                return project;
             }
+            var repositories = repoConnector.GetRepositories();
+
+            string currentRepo = project.GetPropertyValue(Config.Instance.RepoNameProperty);
+            currentRepo = taskContext.GetStringSelection("Which Repository do you want to connect to?", repositories.Select(x => x.Name).ToList(), currentRepo);
+            project.SetAttibuteValue(Config.Instance.RepoNameProperty, currentRepo);
+
             return objectToExecuteOn;
         }
 
