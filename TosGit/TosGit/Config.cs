@@ -23,5 +23,8 @@ namespace TosGit
         public string RepoProperty => "Repository";
         public string RepoUserProperty => "RepoUser";
         public string RepoPasswordProperty => "RepoPassword";
+        public string BranchFolderName => "Branches";
+        public string BranchPropertyName => "OriginBranch";
+        public string RepoNameProperty => "RepoName";
     }
 }
