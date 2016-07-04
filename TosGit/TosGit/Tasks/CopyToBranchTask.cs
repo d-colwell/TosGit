@@ -30,8 +30,8 @@ namespace TosGit.Tasks
         {
             var project = FindProject(objs.First());
             var propertyDefinitions = project.DefaultPropertiesDefinition;
-            var branchFolder = project.Items.First(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
-            var branches = branchFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
+            var branchesFolder = project.Items.First(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
+            var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
 
             string toBranch = context.GetStringSelection("Select a branch", branches.Select(x => x.Name).ToList());
 
@@ -51,8 +51,13 @@ namespace TosGit.Tasks
                 pastedItem.SetAttibuteValue(Config.Instance.SourceItemProperty, item.UniqueId);
             }
 
+            var oldModuleIDs = new Dictionary<string, TCObject>();
+            GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
+            RepointTestSteps(branchDestinationFolder, oldModuleIDs);
             return objs.FirstOrDefault();
         }
+
+
 
         private TCProject FindProject(TCObject tcObject)
         {
@@ -107,6 +112,46 @@ namespace TosGit.Tasks
                 resultFolder = root.CreateFolder();
             resultFolder.Name = folder.Name;
             return resultFolder;
+        }
+
+        private void GetOldModuleIds(TCFolder folder, Dictionary<string,TCObject> reference)
+        {
+            var modulesFolders = folder.Items.Where(x => x is TCFolder && ((TCFolder)x).PossibleContent.Contains("Module"));
+            foreach (var childFolder in modulesFolders)
+            {
+                GetOldModuleIds((TCFolder)childFolder,reference);
+            }
+            var modules = folder.Items.Where(x => x is Module || x is XModule);
+            foreach (var module in modules)
+            {
+                reference.Add(module.GetPropertyValue(Config.Instance.SourceItemProperty), module);
+            }
+        }
+
+        private void RepointTestSteps(TCFolder folder, Dictionary<string,TCObject> moduleReferences)
+        {
+            var testFolders = folder.Items.Where(x => x is TCFolder && ((TCFolder)x).PossibleContent.Contains("TestCase"));
+            foreach (var childFolder in testFolders)
+            {
+                RepointTestSteps((TCFolder)childFolder, moduleReferences);
+            }
+            var tests = folder.Items.Where(x => x is TestCase);
+            foreach (TestCase test in tests)
+            {
+                var xTestSteps = test.Items.Where(x => x is XTestStep).Cast<XTestStep>();
+                foreach (var step in xTestSteps)
+                {
+                    if (moduleReferences.ContainsKey(step.Module.UniqueId))
+                        step.AssignModuleToTestStep(moduleReferences[step.Module.UniqueId]);
+                }
+                var testSteps = test.Items.Where(x => x is TestStep).Cast<TestStep>();
+                foreach (var step in testSteps)
+                {
+                    if (moduleReferences.ContainsKey(step.Module.UniqueId))
+                        step.AssignModuleToTestStep(moduleReferences[step.Module.UniqueId]);
+                }
+            }
+
         }
 
     }
