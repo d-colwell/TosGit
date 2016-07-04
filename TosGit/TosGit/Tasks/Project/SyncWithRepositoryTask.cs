@@ -25,6 +25,7 @@ namespace TosGit.Tasks.Project
             string repoName = project.GetPropertyValue(Config.Instance.RepoNameProperty);
             var repoConnector = new GitRepoConnector(project.GetPropertyValue(Config.Instance.RepoProperty), project.GetPropertyValue(Config.Instance.RepoUserProperty), project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
             var branches = repoConnector.GetRemoteBranches(repoName).Where(x => x.Name != "master");
+            var pullRequests = repoConnector.GetPullRequests(repoName);
             var rootFolder = project.Items.FirstOrDefault(x => x.GetType() == typeof(TCComponentFolder) && x.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
             if (rootFolder == null)
             {

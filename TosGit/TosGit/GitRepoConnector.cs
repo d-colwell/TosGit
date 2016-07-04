@@ -40,10 +40,6 @@ namespace TosGit
 
         public IEnumerable<Octokit.Branch> GetRemoteBranches(string repository)
         {
-            var results = client.Search.SearchRepo(new Octokit.SearchRepositoriesRequest(repository)
-            {
-                In = new Octokit.InQualifier[] {Octokit.InQualifier.Name }
-            });
             var repositories = client.Repository.GetAllBranches(client.Credentials.Login, repository).Result;
             return repositories;
             //using (var repo = new Repository(repoPath))
@@ -56,6 +52,12 @@ namespace TosGit
             //    //var rootNode = GetChildrenRecursive(origin, branches);
             //    //return new GitBranchTree { Origin = rootNode };
             //}
+        }
+
+        public IEnumerable<Octokit.PullRequest> GetPullRequests(string repository)
+        {
+            var pullRequests = client.PullRequest.GetAllForRepository(client.Credentials.Login, repository);
+            return pullRequests.Result;
         }
 
         //public IEnumerable<Octokit.PullRequest> GetPullRequests()
