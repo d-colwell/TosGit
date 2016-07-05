@@ -8,7 +8,7 @@ using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit.Tasks
 {
-    internal class CopyToBranchTask : TCAddOnTask
+    internal class RemoveFromBranch : TCAddOnTask
     {
         public override Type ApplicableType => typeof(TCObject);
 
@@ -16,8 +16,9 @@ namespace TosGit.Tasks
 
         public override bool IsTaskPossible(TCObject obj)
         {
-            if (obj is TCProject || obj is TCComponentFolder)
+            if (obj is TCProject || obj is TCFolder)
                 return false;
+
             return true;
         }
 
@@ -39,6 +40,12 @@ namespace TosGit.Tasks
 
             foreach (var item in objs)
             {
+                var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
+                if(existingItems.Any())
+                {
+                    context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
+                    continue;
+                }
                 var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
                 TCObject pastedItem = null;
                 item.Copy();
