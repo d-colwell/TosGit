@@ -46,7 +46,7 @@ namespace TosGit.Tasks.Project
 
             SetRepoProperties(project, taskContext);
 
-            var repoConnector = new GitRepoConnector(project.GetPropertyValue(Config.Instance.RepoProperty), project.GetPropertyValue(Config.Instance.RepoUserProperty), project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
+            var repoConnector = Container.Instance.GetRepositoryConnector(project.GetPropertyValue(Config.Instance.RepoProperty), project.GetPropertyValue(Config.Instance.RepoUserProperty), project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
             if(!repoConnector.TestConnection())
             {
                 taskContext.ShowWarningMessage("Could not connect", "Unable to connect to repository using credentials provided. Please try again.");

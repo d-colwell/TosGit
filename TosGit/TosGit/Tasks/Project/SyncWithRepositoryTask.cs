@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TosGit.Connectors;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
 
@@ -23,9 +24,9 @@ namespace TosGit.Tasks.Project
         {
             TCProject project = objectToExecuteOn as TCProject;
             string repoName = project.GetPropertyValue(Config.Instance.RepoNameProperty);
-            var repoConnector = new GitRepoConnector(project.GetPropertyValue(Config.Instance.RepoProperty), project.GetPropertyValue(Config.Instance.RepoUserProperty), project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
+            var repoConnector = Container.Instance.GetRepositoryConnector(project.GetPropertyValue(Config.Instance.RepoProperty), project.GetPropertyValue(Config.Instance.RepoUserProperty), project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
             var branches = repoConnector.GetRemoteBranches(repoName).Where(x => x.Name != "master");
-            var pullRequests = repoConnector.GetPullRequests(repoName);
+
             var rootFolder = project.Items.FirstOrDefault(x => x.GetType() == typeof(TCComponentFolder) && x.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
             if (rootFolder == null)
             {
@@ -41,8 +42,7 @@ namespace TosGit.Tasks.Project
             return objectToExecuteOn;
         }
 
-
-        public void CreateComponentFolder(TCComponentFolder parentFolder, Octokit.Branch branch)
+        public void CreateComponentFolder(TCComponentFolder parentFolder, IBranch branch)
         {
             TCFolder childFolder = null;
             if (!parentFolder.Items.Any(i => i.Name == branch.Name && i.GetType() == typeof(TCComponentFolder)))

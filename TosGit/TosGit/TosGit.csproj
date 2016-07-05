@@ -56,7 +56,13 @@
   <ItemGroup>
     <Compile Include="BranchDefinition.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="GitRepoConnector.cs" />
+    <Compile Include="Connectors\GitHub\GitHubBranch.cs" />
+    <Compile Include="Connectors\GitHub\GitHubRepository.cs" />
+    <Compile Include="Connectors\GitHub\GitHubRepoConnector.cs" />
+    <Compile Include="Connectors\IBranch.cs" />
+    <Compile Include="Connectors\IRepoConnector.cs" />
+    <Compile Include="Connectors\IRepository.cs" />
+    <Compile Include="Container.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\RemoveFromBranch.cs" />
     <Compile Include="Tasks\CopyToBranchTask.cs" />
