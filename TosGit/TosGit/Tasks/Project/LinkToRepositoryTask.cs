@@ -19,6 +19,10 @@ namespace TosGit.Tasks.Project
         public override TCObject Execute(TCObject objectToExecuteOn, TCAddOnTaskContext taskContext)
         {
             TCProject project = objectToExecuteOn as TCProject;
+            var propertyDefinitions = project.ObjectPropertiesDefinitions.FirstOrDefault(x => x.Name == "XModule");
+            if (propertyDefinitions == null)
+                project.CreatePropertyDefinitionXModule().Name = "XModule";
+
             if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoProperty))
             {
                 var prop = project.DefaultPropertiesDefinition.CreateProperty();
@@ -34,6 +38,7 @@ namespace TosGit.Tasks.Project
             if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoPasswordProperty))
             {
                 var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                prop.Visible = false;
                 prop.Name = Config.Instance.RepoPasswordProperty;
                 prop.Value = string.Empty;
             }
@@ -44,10 +49,11 @@ namespace TosGit.Tasks.Project
                 prop.Value = string.Empty;
             }
 
+
             SetRepoProperties(project, taskContext);
 
             var repoConnector = Container.Instance.GetRepositoryConnector(project.GetPropertyValue(Config.Instance.RepoProperty), project.GetPropertyValue(Config.Instance.RepoUserProperty), project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
-            if(!repoConnector.TestConnection())
+            if (!repoConnector.TestConnection())
             {
                 taskContext.ShowWarningMessage("Could not connect", "Unable to connect to repository using credentials provided. Please try again.");
                 return project;

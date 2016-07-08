@@ -8,11 +8,11 @@ using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit.Tasks
 {
-    internal class RemoveFromBranch : TCAddOnTask
+    internal class MergeTask : TCAddOnTask
     {
         public override Type ApplicableType => typeof(TCObject);
 
-        public override string Name => "Copy to Branch";
+        public override string Name => "Merge";
 
         public override bool IsTaskPossible(TCObject obj)
         {
@@ -37,12 +37,11 @@ namespace TosGit.Tasks
             string toBranch = context.GetStringSelection("Select a branch", branches.Select(x => x.Name).ToList());
 
             TCComponentFolder branchDestinationFolder = branches.First(x => x.Name == toBranch) as TCComponentFolder;
-            var objectTracker = Container.Instance.GetObjectTracker(branchDestinationFolder);
 
             foreach (var item in objs)
             {
                 var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
-                if (existingItems.Any())
+                if(existingItems.Any())
                 {
                     context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
                     continue;
@@ -52,15 +51,6 @@ namespace TosGit.Tasks
                 item.Copy();
                 targetFolder.Paste();
                 pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
-                objectTracker.Add(item.UniqueId, pastedItem.UniqueId);
-
-                var subItems = item.Search("=>Items").ToArray();
-                var copiedSubItems = pastedItem.Search("=>Items").ToArray();
-                for (int i = 0; i < subItems.Length; i++)
-                {
-                    objectTracker.Add(subItems[i].UniqueId, copiedSubItems[i].UniqueId);
-                }
-
                 if (!pastedItem.GetPropertyNames().Any(p => p == Config.Instance.SourceItemProperty))
                 {
                     pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
@@ -71,7 +61,6 @@ namespace TosGit.Tasks
             var oldModuleIDs = new Dictionary<string, TCObject>();
             GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
             RepointTestSteps(branchDestinationFolder, oldModuleIDs);
-            objectTracker.Commit();
             return objs.FirstOrDefault();
         }
 
@@ -132,12 +121,12 @@ namespace TosGit.Tasks
             return resultFolder;
         }
 
-        private void GetOldModuleIds(TCFolder folder, Dictionary<string, TCObject> reference)
+        private void GetOldModuleIds(TCFolder folder, Dictionary<string,TCObject> reference)
         {
             var modulesFolders = folder.Items.Where(x => x is TCFolder && ((TCFolder)x).PossibleContent.Contains("Module"));
             foreach (var childFolder in modulesFolders)
             {
-                GetOldModuleIds((TCFolder)childFolder, reference);
+                GetOldModuleIds((TCFolder)childFolder,reference);
             }
             var modules = folder.Items.Where(x => x is Module || x is XModule);
             foreach (var module in modules)
@@ -146,22 +135,30 @@ namespace TosGit.Tasks
             }
         }
 
-        private void RepointTestSteps(TCFolder folder, Dictionary<string, TCObject> moduleReferences)
+        private void RepointTestSteps(TCFolder folder, Dictionary<string,TCObject> moduleReferences)
         {
             var testFolders = folder.Items.Where(x => x is TCFolder && ((TCFolder)x).PossibleContent.Contains("TestCase"));
-            var xTestSteps = folder.Search("=>SUBPARTS:TestCase=>SUBPARTS:XTestStep").Cast<XTestStep>();
-            var testSteps = folder.Search("=>SUBPARTS:TestCase=>SUBPARTS:TestStep").Cast<TestStep>();
+            foreach (var childFolder in testFolders)
+            {
+                RepointTestSteps((TCFolder)childFolder, moduleReferences);
+            }
+            var tests = folder.Items.Where(x => x is TestCase);
+            foreach (TestCase test in tests)
+            {
+                var xTestSteps = test.Items.Where(x => x is XTestStep).Cast<XTestStep>();
+                foreach (var step in xTestSteps)
+                {
+                    if (moduleReferences.ContainsKey(step.Module.UniqueId))
+                        step.AssignModuleToTestStep(moduleReferences[step.Module.UniqueId]);
+                }
+                var testSteps = test.Items.Where(x => x is TestStep).Cast<TestStep>();
+                foreach (var step in testSteps)
+                {
+                    if (moduleReferences.ContainsKey(step.Module.UniqueId))
+                        step.AssignModuleToTestStep(moduleReferences[step.Module.UniqueId]);
+                }
+            }
 
-            foreach (var step in xTestSteps)
-            {
-                if (moduleReferences.ContainsKey(step.Module.UniqueId))
-                    step.AssignModuleToTestStep(moduleReferences[step.Module.UniqueId]);
-            }
-            foreach (var step in testSteps)
-            {
-                if (moduleReferences.ContainsKey(step.Module.UniqueId))
-                    step.AssignModuleToTestStep(moduleReferences[step.Module.UniqueId]);
-            }
         }
 
     }

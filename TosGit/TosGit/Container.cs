@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TosGit.Connectors;
+using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit
 {
@@ -24,6 +25,11 @@ namespace TosGit
         {
             //Decision which repository to use here
             return new Connectors.GitHub.GitHubRepoConnector(url, username, password);
+        }
+
+        public ObjectTracker.IObjectTracker GetObjectTracker(TCComponentFolder branchFolder)
+        {
+            return new ObjectTracker.EmbeddedFileObjectTracker(branchFolder);
         }
     }
 }

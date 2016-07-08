@@ -27,5 +27,6 @@ namespace TosGit
         public string BranchPropertyName => "OriginBranch";
         public string RepoNameProperty => "RepoName";
         public string SourceItemProperty => "SourceItemID";
+        public string TrackingFileName => "object-map.csv";
     }
 }

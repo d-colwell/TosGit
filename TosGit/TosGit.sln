@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TosGit", "TosGit\TosGit.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tricentis.TCAPIObjects.ExtensionMethods", "Tricentis.TCAPIObjects.ExtensionMethods\Tricentis.TCAPIObjects.ExtensionMethods.csproj", "{BA83B76B-FA9E-43D4-AE3B-6319F240217E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TosGit.MergeUI", "TosGit.MergeUI\TosGit.MergeUI.csproj", "{97E4AF97-D12D-46E3-81FC-9A429C8A7934}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TosGit.Merge", "TosGit.Merge\TosGit.Merge.csproj", "{7BCD9704-3A85-499B-B9A4-706580681A69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{BA83B76B-FA9E-43D4-AE3B-6319F240217E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA83B76B-FA9E-43D4-AE3B-6319F240217E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA83B76B-FA9E-43D4-AE3B-6319F240217E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97E4AF97-D12D-46E3-81FC-9A429C8A7934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97E4AF97-D12D-46E3-81FC-9A429C8A7934}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97E4AF97-D12D-46E3-81FC-9A429C8A7934}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97E4AF97-D12D-46E3-81FC-9A429C8A7934}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BCD9704-3A85-499B-B9A4-706580681A69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BCD9704-3A85-499B-B9A4-706580681A69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BCD9704-3A85-499B-B9A4-706580681A69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BCD9704-3A85-499B-B9A4-706580681A69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
