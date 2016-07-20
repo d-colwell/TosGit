@@ -20,6 +20,7 @@ namespace TosGit.Connectors.BitBucket
             catch (Exception)
             {
                 //OMNOMNOMNOM tasty exceptions
+                throw new NotImplementedException();
             }
         }
         public IEnumerable<IBranch> GetRemoteBranches(string repository)
