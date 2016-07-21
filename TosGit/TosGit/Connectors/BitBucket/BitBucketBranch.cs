@@ -20,7 +20,7 @@ namespace TosGit.Connectors.BitBucket
         {
             get
             {
-                return _branch.Name;
+                return _branch.DisplayId;
             }
         }
     }

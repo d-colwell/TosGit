@@ -4,8 +4,8 @@ namespace TosGit.Connectors
 {
     public interface IRepositoryConnector
     {
-        IEnumerable<IBranch> GetRemoteBranches(string repository);
-        IEnumerable<IRepository> GetRepositories();
+        IEnumerable<IBranch> GetRemoteBranches(string project, string repository);
+        IEnumerable<IRepository> GetRepositories(string project);
         bool TestConnection();
     }
 }
