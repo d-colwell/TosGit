@@ -2,77 +2,97 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit.ObjectTracker
 {
-    internal class EmbeddedFileObjectTracker : IObjectTracker
+    class EmbeddedFileObjectTracker : IObjectTracker
     {
-        private readonly string _filePath;
-        private readonly TCComponentFolder _folder;
-        private IList<KeyValuePair<string, string>> _objectMap;
-
+        private readonly string filePath;
+        private readonly TCComponentFolder folder;
+        private IDictionary<string, string> sourceObjects;
+        private IDictionary<string, string> newObjects;
         public EmbeddedFileObjectTracker(TCComponentFolder componentFolder)
         {
-            this._folder = componentFolder;
-            _objectMap = new List<KeyValuePair<string, string>>();
-            this._filePath = Path.Combine(Path.GetTempPath(), Config.Instance.TrackingFileName);
-            if (componentFolder != null && componentFolder.AttachedFiles.All(x => x.Name != Config.Instance.TrackingFileName))
+            this.folder = componentFolder;
+            this.sourceObjects = new Dictionary<string, string>();
+            this.newObjects = new Dictionary<string, string>();
+
+            this.filePath = Path.Combine(Path.GetTempPath(), Config.Instance.TrackingFileName);
+            if (!componentFolder.AttachedFiles.Any(x => x.Name == Config.Instance.TrackingFileName))
             {
-                using (var fStream = File.CreateText(_filePath))
+                using (var fStream = File.CreateText(filePath))
                 {
 
                 }
-                componentFolder.AttachFile(_filePath,"Embedded");
+                componentFolder.AttachFile(filePath, "Embedded");
             }
             else
             {
-                if (componentFolder != null)
+                var attachedFile = componentFolder.AttachedFiles.First(x => x.Name == Config.Instance.TrackingFileName);
+                string content = System.Text.Encoding.UTF8.GetString(attachedFile.EmbeddedContent.Data);
+                var records = content.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var record in records)
                 {
-                    var attachedFile = componentFolder.AttachedFiles.First(x => x.Name == Config.Instance.TrackingFileName);
-                    string content = System.Text.Encoding.UTF8.GetString(attachedFile.EmbeddedContent.Data);
-                    var records = content.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var record in records)
-                    {
-                        string[] splitRecord = record.Split(',');
-                        _objectMap.Add(new KeyValuePair<string, string>(splitRecord[0], splitRecord[1]));
-                    }
+                    string[] splitRecord = record.Split(',');
+                    Add(splitRecord[0], splitRecord[1], true);
                 }
             }
         }
-        public void Add(string sourceObject, string newObject)
+        public void Add(string sourceObject, string newObject, bool overrideExistingLinks = false)
         {
-            _objectMap.Add(new KeyValuePair<string, string>(sourceObject, newObject));
+            if (sourceObjects.ContainsKey(sourceObject))
+            {
+                if (sourceObjects[sourceObject] == newObject)
+                    return; //avoid creating duplicates
+                else if (overrideExistingLinks)
+                {
+                    sourceObjects.Remove(sourceObject);
+                    if (newObjects.ContainsKey(newObject))
+                        newObjects.Remove(newObject);
+                }
+                else
+                    throw new InvalidOperationException(string.Format("Source object {0} is already linked to object {1}", sourceObject, newObject));
+            }
+            sourceObjects.Add(new KeyValuePair<string, string>(sourceObject, newObject));
+            newObjects.Add(newObject, sourceObject);
         }
 
         public string GetNewObject(string sourceObject)
         {
-            return _objectMap.First(x => x.Key == sourceObject).Value;
+            return sourceObjects[sourceObject];
         }
 
         public string GetSourceObject(string newObject)
         {
-            return _objectMap.First(x => x.Value == newObject).Key;
+            return newObjects[newObject];
+        }
+
+        public bool HasSourceObject(string newObject)
+        {
+            return sourceObjects.ContainsKey(newObject);
         }
 
         public void Commit()
         {
-            if (File.Exists(_filePath))
-                File.Delete(_filePath);
-            using (var fStream = File.CreateText(_filePath))
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+            using (var fStream = File.CreateText(filePath))
             {
-                foreach (var record in _objectMap)
+                foreach (var record in sourceObjects)
                 {
-                    fStream.Write($"{record.Key},{record.Value}{Environment.NewLine}");
+                    fStream.Write(string.Format("{0},{1}{2}", record.Key, record.Value, Environment.NewLine));
                 }
             }
-            foreach(var attachedFile in _folder.AttachedFiles.Where(x => x.Name == Config.Instance.TrackingFileName))
+            foreach (var attachedFile in folder.AttachedFiles.Where(x => x.Name == Config.Instance.TrackingFileName))
             {
                 var continueOnWarning = MsgBoxResult_OkCancel.Ok;
                 var deleteConfirm = MsgBoxResult_YesNo.Yes;
                 attachedFile.Delete(continueOnWarning, deleteConfirm);
             }
-            _folder.AttachFile(_filePath, "Embedded");
+            folder.AttachFile(filePath, "Embedded");
         }
     }
 }

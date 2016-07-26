@@ -10,7 +10,7 @@ namespace TosGit.Tasks.Project
     {
         public override Type ApplicableType => typeof(TCProject);
 
-        public override string Name => "Sync with Repository";
+        public override string Name => Resources.SyncTaskName;
 
         public override bool IsTaskPossible(TCObject obj)
         {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
 
@@ -10,7 +12,7 @@ namespace TosGit.Tasks
     {
         public override Type ApplicableType => typeof(TCObject);
 
-        public override string Name => "Copy to Branch";
+        public override string Name => Resources.CopyToBranchTaskName;
 
         public override bool IsTaskPossible(TCObject obj)
         {
@@ -29,56 +31,52 @@ namespace TosGit.Tasks
         {
             var project = FindProject(objs.First());
             var propertyDefinitions = project.DefaultPropertiesDefinition;
-            var branchesFolder = project.Items.First(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
-            if (branchesFolder != null)
+            var branchesFolder = project.Items.FirstOrDefault(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
+            if(branchesFolder == null)
             {
-                var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
+                context.ShowErrorMessage("No branch folder found", "Please ensure that there are branches in your project");
+                return objs.First();
+            }
+            var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
 
-                var ownedItems = branches as OwnedItem[] ?? branches.ToArray();
-                string toBranch = context.GetStringSelection("Select a branch", ownedItems.Select(x => x.Name).ToList());
+            string toBranch = context.GetStringSelection("Select a branch", branches.Select(x => x.Name).ToList());
 
-                TCComponentFolder branchDestinationFolder = ownedItems.First(x => x.Name == toBranch) as TCComponentFolder;
-                var objectTracker = Container.Instance.GetObjectTracker(branchDestinationFolder);
+            TCComponentFolder branchDestinationFolder = branches.First(x => x.Name == toBranch) as TCComponentFolder;
+            var objectTracker = Container.Instance.GetObjectTracker(branchDestinationFolder);
 
-                foreach (var item in objs)
+            foreach (var item in objs)
+            {
+                var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
+                if (existingItems.Any())
                 {
-                    if (branchDestinationFolder != null)
-                    {
-                        var existingItems = branchDestinationFolder.Search(
-                            $"=>SUBPARTS[(SourceItemID==\"{item.UniqueId}\")]");
-                        if (existingItems.Any())
-                        {
-                            context.ShowWarningMessage("Duplicate Item",
-                                $"Item {item.DisplayedName} already exists in branch. This item was skipped");
-                            continue;
-                        }
-                    }
-                    var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
-                    TCObject pastedItem = null;
-                    item.Copy();
-                    targetFolder.Paste();
-                    pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
-                    objectTracker.Add(item.UniqueId, pastedItem.UniqueId);
+                    context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
+                    continue;
+                }
+                var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
+                TCObject pastedItem = null;
+                item.Copy();
+                targetFolder.Paste();
+                pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
+                objectTracker.Add(item.UniqueId, pastedItem.UniqueId);
 
-                    var subItems = item.Search("=>Items").ToArray();
-                    var copiedSubItems = pastedItem.Search("=>Items").ToArray();
-                    for (int i = 0; i < subItems.Length; i++)
-                    {
-                        objectTracker.Add(subItems[i].UniqueId, copiedSubItems[i].UniqueId);
-                    }
-
-                    if (pastedItem.GetPropertyNames().All(p => p != Config.Instance.SourceItemProperty))
-                    {
-                        pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
-                    }
-                    pastedItem.SetAttibuteValue(Config.Instance.SourceItemProperty, item.UniqueId);
+                var subItems = item.Search("=>SUBPARTS:TCObject").ToArray();
+                var copiedSubItems = pastedItem.Search("=>SUBPARTS:TCObject").ToArray();
+                for (int i = 0; i < subItems.Length; i++)
+                {
+                    objectTracker.Add(subItems[i].UniqueId, copiedSubItems[i].UniqueId);
                 }
 
-                var oldModuleIDs = new Dictionary<string, TCObject>();
-                GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
-                RepointTestSteps(branchDestinationFolder, oldModuleIDs);
-                objectTracker.Commit();
+                if (!pastedItem.GetPropertyNames().Any(p => p == Config.Instance.SourceItemProperty))
+                {
+                    pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
+                }
+                pastedItem.SetAttibuteValue(Config.Instance.SourceItemProperty, item.UniqueId);
             }
+
+            var oldModuleIDs = new Dictionary<string, TCObject>();
+            GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
+            RepointTestSteps(branchDestinationFolder, oldModuleIDs);
+            objectTracker.Commit();
             return objs.FirstOrDefault();
         }
 

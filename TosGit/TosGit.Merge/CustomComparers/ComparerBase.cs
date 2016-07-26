@@ -14,10 +14,6 @@ namespace TosGit.MergeUI.CustomComparers
         }
 
         public virtual Type[] ApplicableTypes { get; }
-        /// <summary>
-        /// The text that should be used when describing the types this comparer utilise
-        /// </summary>
-        public virtual string NameToDisplay { get; }
 
     }
 }
