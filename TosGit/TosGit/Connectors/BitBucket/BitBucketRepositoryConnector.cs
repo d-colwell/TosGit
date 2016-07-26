@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Atlassian.Stash;
 
 namespace TosGit.Connectors.BitBucket
 {
-    class BitBucketRepositoryConnector : IRepositoryConnector
+    internal class BitBucketRepositoryConnector : IRepositoryConnector
     {
         private readonly StashClient _client;
 
@@ -19,15 +17,20 @@ namespace TosGit.Connectors.BitBucket
             }
             catch (Exception)
             {
-                //OMNOMNOMNOM tasty exceptions
+                // OMNOMNOMNOM tasty exceptions
+                // Added Tasty Exceptions of Not Implemented
                 throw new NotImplementedException();
             }
         }
         public IEnumerable<IBranch> GetRemoteBranches(string project ,string repository )
         {
-            var repo = _client.Repositories.Get(project).Result.Values.Where(x=>x.Name == repository).FirstOrDefault();
-            var branches = _client.Branches.Get(project, repo.Slug).Result.Values;
-            return branches.Select(b => new BitBucketBranch(b));
+            var repo = _client.Repositories.Get(project).Result.Values.FirstOrDefault(x => x.Name == repository);
+            if (repo != null)
+            {
+                var branches = _client.Branches.Get(project, repo.Slug).Result.Values;
+                return branches.Select(b => new BitBucketBranch(b));
+            }
+            return null;
         }
 
         public IEnumerable<IRepository> GetRepositories(string project)

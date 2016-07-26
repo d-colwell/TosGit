@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tricentis.TCAPIObjects.Objects
 {
-    public static class TCFolderHelpers
+    public static partial class TcFolderHelpers
     {
         /// <summary>
         /// Searches the subtrees recursively and finds all the descendent items

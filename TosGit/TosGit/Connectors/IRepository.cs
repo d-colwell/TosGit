@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TosGit.Connectors
+﻿namespace TosGit.Connectors
 {
     public interface IRepository
     {
-        string Name { get; }
+        string Name { get; set; }
     }
 }

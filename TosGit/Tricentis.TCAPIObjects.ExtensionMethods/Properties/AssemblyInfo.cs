@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -8,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Tricentis.TCAPIObjects.ExtensionMethods")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Silverfox Technologies Pty Ltd")]
 [assembly: AssemblyProduct("Tricentis.TCAPIObjects.ExtensionMethods")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]

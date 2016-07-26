@@ -75,7 +75,7 @@
     <Compile Include="Container.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\ComponentFolder\CopyToBranchTask.cs" />
-    <Compile Include="Tasks\JUNK_compareTestsTask.cs" />
+    <Compile Include="Tasks\JunkCompareTestsTask.cs" />
     <Compile Include="ObjectTracker\EmbeddedFileObjectTracker.cs" />
     <Compile Include="ObjectTracker\IObjectTracker.cs" />
     <Compile Include="Tasks\RemoveFromBranch.cs" />

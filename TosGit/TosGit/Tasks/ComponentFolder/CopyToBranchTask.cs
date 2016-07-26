@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
 
-namespace TosGit.Tasks
+namespace TosGit.Tasks.ComponentFolder
 {
     internal class MergeTask : TCAddOnTask
     {
@@ -32,35 +30,44 @@ namespace TosGit.Tasks
             var project = FindProject(objs.First());
             var propertyDefinitions = project.DefaultPropertiesDefinition;
             var branchesFolder = project.Items.First(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
-            var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
-
-            string toBranch = context.GetStringSelection("Select a branch", branches.Select(x => x.Name).ToList());
-
-            TCComponentFolder branchDestinationFolder = branches.First(x => x.Name == toBranch) as TCComponentFolder;
-
-            foreach (var item in objs)
+            if (branchesFolder != null)
             {
-                var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
-                if(existingItems.Any())
-                {
-                    context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
-                    continue;
-                }
-                var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
-                TCObject pastedItem = null;
-                item.Copy();
-                targetFolder.Paste();
-                pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
-                if (!pastedItem.GetPropertyNames().Any(p => p == Config.Instance.SourceItemProperty))
-                {
-                    pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
-                }
-                pastedItem.SetAttibuteValue(Config.Instance.SourceItemProperty, item.UniqueId);
-            }
+                var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
 
-            var oldModuleIDs = new Dictionary<string, TCObject>();
-            GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
-            RepointTestSteps(branchDestinationFolder, oldModuleIDs);
+                var ownedItems = branches as OwnedItem[] ?? branches.ToArray();
+                string toBranch = context.GetStringSelection("Select a branch", ownedItems.Select(x => x.Name).ToList());
+
+                TCComponentFolder branchDestinationFolder = ownedItems.First(x => x.Name == toBranch) as TCComponentFolder;
+
+                foreach (var item in objs)
+                {
+                    if (branchDestinationFolder != null)
+                    {
+                        var existingItems = branchDestinationFolder.Search(
+                            $"=>SUBPARTS[(SourceItemID==\"{item.UniqueId}\")]");
+                        if(existingItems.Any())
+                        {
+                            context.ShowWarningMessage("Duplicate Item",
+                                $"Item {item.DisplayedName} already exists in branch. This item was skipped");
+                            continue;
+                        }
+                    }
+                    var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
+                    TCObject pastedItem = null;
+                    item.Copy();
+                    targetFolder.Paste();
+                    pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
+                    if (pastedItem.GetPropertyNames().All(p => p != Config.Instance.SourceItemProperty))
+                    {
+                        pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
+                    }
+                    pastedItem.SetAttibuteValue(Config.Instance.SourceItemProperty, item.UniqueId);
+                }
+
+                var oldModuleIDs = new Dictionary<string, TCObject>();
+                GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
+                RepointTestSteps(branchDestinationFolder, oldModuleIDs);
+            }
             return objs.FirstOrDefault();
         }
 
@@ -69,9 +76,9 @@ namespace TosGit.Tasks
         private TCProject FindProject(TCObject tcObject)
         {
             TCFolder folder = tcObject.OwningObject.ParentFolder as TCFolder;
-            while (folder.ParentFolder != null)
+            while (folder != null && folder.ParentFolder != null)
                 folder = folder.ParentFolder as TCFolder;
-            return folder.Project as TCProject;
+            return folder?.Project as TCProject;
         }
 
         /// <summary>
@@ -87,9 +94,8 @@ namespace TosGit.Tasks
             do
             {
                 structure.Push(currentFolder);
-                currentFolder = currentFolder.ParentFolder as TCFolder;
-            }
-            while (currentFolder != null && !(currentFolder is TCComponentFolder));
+                currentFolder = currentFolder?.ParentFolder as TCFolder;
+            } while (currentFolder != null && !(currentFolder is TCComponentFolder));
 
             TCFolder newRoot = null;
             while (structure.Count > 0)
@@ -143,8 +149,9 @@ namespace TosGit.Tasks
                 RepointTestSteps((TCFolder)childFolder, moduleReferences);
             }
             var tests = folder.Items.Where(x => x is TestCase);
-            foreach (TestCase test in tests)
+            foreach (var ownedItem in tests)
             {
+                var test = (TestCase) ownedItem;
                 var xTestSteps = test.Items.Where(x => x is XTestStep).Cast<XTestStep>();
                 foreach (var step in xTestSteps)
                 {

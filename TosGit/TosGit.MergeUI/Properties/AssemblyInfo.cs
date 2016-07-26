@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -10,7 +8,7 @@ using System.Windows;
 [assembly: AssemblyTitle("TosGit.Merge")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Silverfox Technologies Pty Ltd")]
 [assembly: AssemblyProduct("TosGit.Merge")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]

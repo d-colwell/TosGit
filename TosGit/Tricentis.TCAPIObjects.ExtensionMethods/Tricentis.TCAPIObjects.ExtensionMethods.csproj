@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TCFolderHelpers.cs" />
+    <Compile Include="TcFolderHelpers.Part.cs" />
     <Compile Include="TCObjectHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestCaseHelpers.cs" />

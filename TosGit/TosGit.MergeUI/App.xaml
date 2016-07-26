@@ -1,7 +1,7 @@
-﻿<Application x:Class="TosGit.Merge.App"
+﻿<Application x:Class="TosGit.MergeUIUI.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:TosGit.Merge"
+             xmlns:local="clr-namespace:TosGit.MergeUI"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

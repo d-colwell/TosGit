@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
 
@@ -32,46 +30,55 @@ namespace TosGit.Tasks
             var project = FindProject(objs.First());
             var propertyDefinitions = project.DefaultPropertiesDefinition;
             var branchesFolder = project.Items.First(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
-            var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
-
-            string toBranch = context.GetStringSelection("Select a branch", branches.Select(x => x.Name).ToList());
-
-            TCComponentFolder branchDestinationFolder = branches.First(x => x.Name == toBranch) as TCComponentFolder;
-            var objectTracker = Container.Instance.GetObjectTracker(branchDestinationFolder);
-
-            foreach (var item in objs)
+            if (branchesFolder != null)
             {
-                var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
-                if (existingItems.Any())
-                {
-                    context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
-                    continue;
-                }
-                var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
-                TCObject pastedItem = null;
-                item.Copy();
-                targetFolder.Paste();
-                pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
-                objectTracker.Add(item.UniqueId, pastedItem.UniqueId);
+                var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
 
-                var subItems = item.Search("=>Items").ToArray();
-                var copiedSubItems = pastedItem.Search("=>Items").ToArray();
-                for (int i = 0; i < subItems.Length; i++)
+                var ownedItems = branches as OwnedItem[] ?? branches.ToArray();
+                string toBranch = context.GetStringSelection("Select a branch", ownedItems.Select(x => x.Name).ToList());
+
+                TCComponentFolder branchDestinationFolder = ownedItems.First(x => x.Name == toBranch) as TCComponentFolder;
+                var objectTracker = Container.Instance.GetObjectTracker(branchDestinationFolder);
+
+                foreach (var item in objs)
                 {
-                    objectTracker.Add(subItems[i].UniqueId, copiedSubItems[i].UniqueId);
+                    if (branchDestinationFolder != null)
+                    {
+                        var existingItems = branchDestinationFolder.Search(
+                            $"=>SUBPARTS[(SourceItemID==\"{item.UniqueId}\")]");
+                        if (existingItems.Any())
+                        {
+                            context.ShowWarningMessage("Duplicate Item",
+                                $"Item {item.DisplayedName} already exists in branch. This item was skipped");
+                            continue;
+                        }
+                    }
+                    var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
+                    TCObject pastedItem = null;
+                    item.Copy();
+                    targetFolder.Paste();
+                    pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
+                    objectTracker.Add(item.UniqueId, pastedItem.UniqueId);
+
+                    var subItems = item.Search("=>Items").ToArray();
+                    var copiedSubItems = pastedItem.Search("=>Items").ToArray();
+                    for (int i = 0; i < subItems.Length; i++)
+                    {
+                        objectTracker.Add(subItems[i].UniqueId, copiedSubItems[i].UniqueId);
+                    }
+
+                    if (pastedItem.GetPropertyNames().All(p => p != Config.Instance.SourceItemProperty))
+                    {
+                        pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
+                    }
+                    pastedItem.SetAttibuteValue(Config.Instance.SourceItemProperty, item.UniqueId);
                 }
 
-                if (!pastedItem.GetPropertyNames().Any(p => p == Config.Instance.SourceItemProperty))
-                {
-                    pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
-                }
-                pastedItem.SetAttibuteValue(Config.Instance.SourceItemProperty, item.UniqueId);
+                var oldModuleIDs = new Dictionary<string, TCObject>();
+                GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
+                RepointTestSteps(branchDestinationFolder, oldModuleIDs);
+                objectTracker.Commit();
             }
-
-            var oldModuleIDs = new Dictionary<string, TCObject>();
-            GetOldModuleIds(branchDestinationFolder, oldModuleIDs);
-            RepointTestSteps(branchDestinationFolder, oldModuleIDs);
-            objectTracker.Commit();
             return objs.FirstOrDefault();
         }
 

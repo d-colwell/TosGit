@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Tricentis.TCAddOns;
 
@@ -9,7 +8,7 @@ using Tricentis.TCAddOns;
 [assembly: AssemblyTitle("TosGit")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Silverfox Technologies Pty Ltd")]
 [assembly: AssemblyProduct("TosGit")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]

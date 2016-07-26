@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tricentis.TCAPIObjects.Objects
 {
@@ -10,7 +6,7 @@ namespace Tricentis.TCAPIObjects.Objects
     {
         public static TCFolder GetFirstAncestor(this TCObject self, Func<TCFolder, bool> selector)
         {
-            if (self.OwningObject == null || self.OwningObject.ParentFolder == null)
+            if (self.OwningObject?.ParentFolder == null)
                 return null;
             TCFolder parentFolder = self.OwningObject.ParentFolder as TCFolder;
             do
@@ -19,7 +15,7 @@ namespace Tricentis.TCAPIObjects.Objects
                 {
                     return parentFolder;
                 }
-                parentFolder = parentFolder.ParentFolder as TCFolder;
+                parentFolder = parentFolder?.ParentFolder as TCFolder;
             } while (parentFolder != null);
             return null;
         }
@@ -27,17 +23,17 @@ namespace Tricentis.TCAPIObjects.Objects
         public static TCProject GetProject(this TCObject self)
         {
             if (self is TCProject)
-                return self as TCProject;
-            if (self.OwningObject == null || self.OwningObject.ParentFolder == null)
+                return (TCProject) self;
+            if (self.OwningObject?.ParentFolder == null)
                 return null;
             TCFolder parentFolder = self.OwningObject.ParentFolder as TCFolder;
             do
             {
-                if (parentFolder.Project != null)
+                if (parentFolder?.Project != null)
                 {
                     return parentFolder.Project as TCProject;
                 }
-                parentFolder = parentFolder.ParentFolder as TCFolder;
+                parentFolder = parentFolder?.ParentFolder as TCFolder;
             } while (parentFolder != null);
             return null;
         }

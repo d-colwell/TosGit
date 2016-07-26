@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit.Tasks
 {
-    class JUNK_compareTestsTask : TCAddOnTask
+    internal class JunkCompareTestsTask : TCAddOnTask
     {
         public override Type ApplicableType => typeof(TestCase);
 

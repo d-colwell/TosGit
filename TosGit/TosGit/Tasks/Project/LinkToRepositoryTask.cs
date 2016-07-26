@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
 
@@ -19,67 +17,91 @@ namespace TosGit.Tasks.Project
         public override TCObject Execute(TCObject objectToExecuteOn, TCAddOnTaskContext taskContext)
         {
             TCProject project = objectToExecuteOn as TCProject;
-            var propertyDefinitions = project.ObjectPropertiesDefinitions.FirstOrDefault(x => x.Name == "XModule");
-            if (propertyDefinitions == null)
-                project.CreatePropertyDefinitionXModule().Name = "XModule";
+            if (project != null)
+            {
+                var propertyDefinitions = project.ObjectPropertiesDefinitions.FirstOrDefault(x => x.Name == "XModule");
+                if (propertyDefinitions == null)
+                    project.CreatePropertyDefinitionXModule().Name = "XModule";
+            }
 
-            if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoProperty))
+            if (objectToExecuteOn.GetPropertyNames().All(p => p != Config.Instance.RepoProperty))
             {
-                var prop = project.DefaultPropertiesDefinition.CreateProperty();
-                prop.Name = Config.Instance.RepoProperty;
-                prop.Value = string.Empty;
+                if (project != null)
+                {
+                    var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                    prop.Name = Config.Instance.RepoProperty;
+                    prop.Value = string.Empty;
+                }
             }
-            if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoUserProperty))
+            if (objectToExecuteOn.GetPropertyNames().All(p => p != Config.Instance.RepoUserProperty))
             {
-                var prop = project.DefaultPropertiesDefinition.CreateProperty();
-                prop.Name = Config.Instance.RepoUserProperty;
-                prop.Value = string.Empty;
+                if (project != null)
+                {
+                    var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                    prop.Name = Config.Instance.RepoUserProperty;
+                    prop.Value = string.Empty;
+                }
             }
-            if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoPasswordProperty))
+            if (objectToExecuteOn.GetPropertyNames().All(p => p != Config.Instance.RepoPasswordProperty))
             {
-                var prop = project.DefaultPropertiesDefinition.CreateProperty();
-                prop.Visible = false;
-                prop.Name = Config.Instance.RepoPasswordProperty;
-                prop.Value = string.Empty;
+                if (project != null)
+                {
+                    var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                    prop.Visible = false;
+                    prop.Name = Config.Instance.RepoPasswordProperty;
+                    prop.Value = string.Empty;
+                }
             }
-            if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoNameProperty))
+            if (objectToExecuteOn.GetPropertyNames().All(p => p != Config.Instance.RepoNameProperty))
             {
-                var prop = project.DefaultPropertiesDefinition.CreateProperty();
-                prop.Name = Config.Instance.RepoNameProperty;
-                prop.Value = string.Empty;
+                if (project != null)
+                {
+                    var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                    prop.Name = Config.Instance.RepoNameProperty;
+                    prop.Value = string.Empty;
+                }
             }
-            if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.ProjectNameProperty))
+            if (objectToExecuteOn.GetPropertyNames().All(p => p != Config.Instance.ProjectNameProperty))
             {
-                var prop = project.DefaultPropertiesDefinition.CreateProperty();
-                prop.Name = Config.Instance.ProjectNameProperty;
-                prop.Value = string.Empty;
+                if (project != null)
+                {
+                    var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                    prop.Name = Config.Instance.ProjectNameProperty;
+                    prop.Value = string.Empty;
+                }
             }
-            if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.GitServerProperty))
+            if (objectToExecuteOn.GetPropertyNames().All(p => p != Config.Instance.GitServerProperty))
             {
-                var prop = project.DefaultPropertiesDefinition.CreateProperty();
-                prop.Name = Config.Instance.GitServerProperty;
-                prop.Value = string.Empty;
+                if (project != null)
+                {
+                    var prop = project.DefaultPropertiesDefinition.CreateProperty();
+                    prop.Name = Config.Instance.GitServerProperty;
+                    prop.Value = string.Empty;
+                }
             }
             SetRepoProperties(project, taskContext);
 
-            var repoConnector = Container.Instance.GetRepositoryConnector(project.GetPropertyValue(Config.Instance.GitServerProperty),
-                        project.GetPropertyValue(Config.Instance.RepoProperty), 
-                        project.GetPropertyValue(Config.Instance.RepoUserProperty), 
-                        project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
-
-            if (!repoConnector.TestConnection())
+            if (project != null)
             {
-                taskContext.ShowWarningMessage("Could not connect", "Unable to connect to repository using credentials provided. Please try again.");
-                return project;
+                var repoConnector = Container.Instance.GetRepositoryConnector(project.GetPropertyValue(Config.Instance.GitServerProperty),
+                    project.GetPropertyValue(Config.Instance.RepoProperty), 
+                    project.GetPropertyValue(Config.Instance.RepoUserProperty), 
+                    project.GetPropertyValue(Config.Instance.RepoPasswordProperty));
+
+                if (!repoConnector.TestConnection())
+                {
+                    taskContext.ShowWarningMessage("Could not connect", "Unable to connect to repository using credentials provided. Please try again.");
+                    return project;
+                }
+
+                string projectName = project.GetPropertyValue(Config.Instance.ProjectNameProperty);
+
+                var repositories = repoConnector.GetRepositories(projectName);
+
+                string currentRepo = project.GetPropertyValue(Config.Instance.RepoNameProperty);
+                currentRepo = taskContext.GetStringSelection("Which Repository do you want to connect to?", repositories.Select(x => x.Name).ToList(), currentRepo);
+                project.SetAttibuteValue(Config.Instance.RepoNameProperty, currentRepo);
             }
-
-            string projectName = project.GetPropertyValue(Config.Instance.ProjectNameProperty);
-
-            var repositories = repoConnector.GetRepositories(projectName);
-
-            string currentRepo = project.GetPropertyValue(Config.Instance.RepoNameProperty);
-            currentRepo = taskContext.GetStringSelection("Which Repository do you want to connect to?", repositories.Select(x => x.Name).ToList(), currentRepo);
-            project.SetAttibuteValue(Config.Instance.RepoNameProperty, currentRepo);
 
             return objectToExecuteOn;
         }
@@ -87,13 +109,11 @@ namespace TosGit.Tasks.Project
 
         private void SetRepoProperties(TCProject objectToExecuteOn, TCAddOnTaskContext taskContext)
         {
-            string repo, userName, password, project, gitServer;
-
-            repo = objectToExecuteOn.GetPropertyValue(Config.Instance.RepoProperty);
-            userName = objectToExecuteOn.GetPropertyValue(Config.Instance.RepoUserProperty);
-            password = objectToExecuteOn.GetPropertyValue(Config.Instance.RepoPasswordProperty);
-            project = objectToExecuteOn.GetPropertyValue(Config.Instance.ProjectNameProperty);
-            gitServer = objectToExecuteOn.GetPropertyValue(Config.Instance.GitServerProperty);
+            var repo = objectToExecuteOn.GetPropertyValue(Config.Instance.RepoProperty);
+            var userName = objectToExecuteOn.GetPropertyValue(Config.Instance.RepoUserProperty);
+            var password = objectToExecuteOn.GetPropertyValue(Config.Instance.RepoPasswordProperty);
+            var project = objectToExecuteOn.GetPropertyValue(Config.Instance.ProjectNameProperty);
+            var gitServer = objectToExecuteOn.GetPropertyValue(Config.Instance.GitServerProperty);
 
             gitServer = taskContext.GetStringSelection("Git Server", new List<string> {"BitBucket","GitHub"}, gitServer);
             repo = taskContext.GetStringValue("Git Repo Location", false, repo);

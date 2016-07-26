@@ -1,4 +1,4 @@
-﻿namespace TosGit.Merge.CustomComparers
+﻿namespace TosGit.MergeUI.CustomComparers
 {
     public class Difference
     {

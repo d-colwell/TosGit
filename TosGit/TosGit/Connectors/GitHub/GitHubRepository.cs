@@ -16,11 +16,18 @@ namespace TosGit.Connectors.GitHub
             this._repository = repo;
         }
 
-        public string Name
+        public string Name => _repository.Name;
+
+        string IRepository.Name
         {
             get
             {
-                return _repository.Name;
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
             }
         }
     }

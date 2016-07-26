@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TosGit.MergeUI.CustomComparers;
 using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit.Merge.CustomComparers

@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Octokit;
-using TosGit.Connectors;
 
 namespace TosGit.Connectors.GitHub
 {
     public class GitHubRepoConnector : IRepositoryConnector
     {
-        Octokit.GitHubClient client;
-        public GitHubRepoConnector(string repoURL, string username, string password)
+        public GitHubClient Client { get; }
+
+        public GitHubRepoConnector(string repoUrl, string username, string password)
         {
-            var uri = new Uri(repoURL);
-            this.client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("ToscaConnector"), uri);
+            var uri = new Uri(repoUrl);
+            this.Client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("ToscaConnector"), uri);
             var credentials = new Octokit.Credentials(username, password);
-            client.Credentials = credentials;
+            Client.Credentials = credentials;
         }
 
         public bool TestConnection()
@@ -36,13 +34,13 @@ namespace TosGit.Connectors.GitHub
 
         public IEnumerable<IRepository> GetRepositories(string project = "")
         {
-            var repositories = client.Repository.GetAllForCurrent().Result;
+            var repositories = Client.Repository.GetAllForCurrent().Result;
             return repositories.Select(x => new GitHubRepository(x));
         }
 
         public IEnumerable<IBranch> GetRemoteBranches(string project, string repository)
         {
-            var branches = client.Repository.GetAllBranches(client.Credentials.Login, repository).Result;
+            var branches = Client.Repository.GetAllBranches(Client.Credentials.Login, repository).Result;
             return branches.Select(b => new GitHubBranch(b));
         }
 

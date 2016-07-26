@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tricentis.TCAddOns;
 using Tricentis.TCAPIObjects.Objects;
 
@@ -24,26 +21,29 @@ namespace TosGit.Tasks
 
         public override TCObject Execute(TCObject objectToExecuteOn, TCAddOnTaskContext taskContext)
         {
-            string originalID = null;
+            string originalId = null;
             try
             {
-                originalID = objectToExecuteOn.GetPropertyValue(Config.Instance.SourceItemProperty);
+                originalId = objectToExecuteOn.GetPropertyValue(Config.Instance.SourceItemProperty);
             }
             catch (Exception)
             {
-                originalID = null;
+                originalId = null;
             }
-            if (originalID != null && (objectToExecuteOn is Module || objectToExecuteOn is XModule))
+            if (originalId != null && (objectToExecuteOn is Module || objectToExecuteOn is XModule))
             {
                 var project = objectToExecuteOn.GetProject();
-                var referencedModule = project.Search(string.Format("=>SUBPARTS[(UniqueId==\"{0}\")]", originalID)).FirstOrDefault();
+                var referencedModule = project.Search($"=>SUBPARTS[(UniqueId==\"{originalId}\")]").FirstOrDefault();
                 var testCaseItems = objectToExecuteOn.Search("->AllReferences:TestCaseItem").Cast<TestCaseItem>();
                 foreach (TestCaseItem item in testCaseItems)
                 {
-                    if (item is XTestStep)
-                        ((XTestStep)item).AssignModuleToTestStep(referencedModule);
-                    else if (item is TestStep)
-                        ((TestStep)item).AssignModuleToTestStep(referencedModule);
+                    var step = item as XTestStep;
+                    if (step != null)
+                        step.AssignModuleToTestStep(referencedModule);
+                    else
+                    {
+                        (item as TestStep)?.AssignModuleToTestStep(referencedModule);
+                    }
                 }
                 /*
                 var branchFolder = objectToExecuteOn.GetFirstAncestor(fldr => fldr is TCComponentFolder && fldr.GetPropertyNames().Contains(Config.Instance.BranchPropertyName));

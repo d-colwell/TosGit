@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tricentis.TCAPIObjects.Objects
 {
@@ -13,8 +11,9 @@ namespace Tricentis.TCAPIObjects.Objects
         {
             var folders = self.Items.Where(i => i is TestStepFolder);
             var items = self.Items.Where(selector);
-            foreach (TestStepFolder folder in folders)
+            foreach (var testCaseItem in folders)
             {
+                var folder = (TestStepFolder) testCaseItem;
                 items = items.Concat(GetItemsRecursive(folder, selector));
             }
             return items.Select(adapter);
@@ -23,8 +22,9 @@ namespace Tricentis.TCAPIObjects.Objects
         private static IEnumerable<TestCaseItem> GetItemsRecursive(TestStepFolder folder, Func<TestCaseItem, bool> selector)
         {
             var items = folder.Items.Where(selector);
-            foreach (TestStepFolder subFolder in folder.Items.Where(i => i is TestStepFolder))
+            foreach (var testCaseItem in folder.Items.Where(i => i is TestStepFolder))
             {
+                var subFolder = (TestStepFolder) testCaseItem;
                 items = items.Concat(GetItemsRecursive(subFolder, selector));
             }
             return items;

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Atlassian.Stash.Entities;
 
 namespace TosGit.Connectors.BitBucket
 {
-    class BitBucketRepository : IRepository
+    internal class BitBucketRepository : IRepository
     {
         private readonly Repository _repository;
 
@@ -20,6 +16,19 @@ namespace TosGit.Connectors.BitBucket
             get
             {
                 return _repository.Name;
+            }
+        }
+
+        string IRepository.Name
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
             }
         }
     }
