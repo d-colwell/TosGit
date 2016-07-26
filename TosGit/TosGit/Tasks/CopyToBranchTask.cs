@@ -12,7 +12,7 @@ namespace TosGit.Tasks
     {
         public override Type ApplicableType => typeof(TCObject);
 
-        public override string Name => "Copy to Branch";
+        public override string Name => Resources.CopyToBranchTaskName;
 
         public override bool IsTaskPossible(TCObject obj)
         {
@@ -31,7 +31,12 @@ namespace TosGit.Tasks
         {
             var project = FindProject(objs.First());
             var propertyDefinitions = project.DefaultPropertiesDefinition;
-            var branchesFolder = project.Items.First(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
+            var branchesFolder = project.Items.FirstOrDefault(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
+            if(branchesFolder == null)
+            {
+                context.ShowErrorMessage("No branch folder found", "Please ensure that there are branches in your project");
+                return objs.First();
+            }
             var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
 
             string toBranch = context.GetStringSelection("Select a branch", branches.Select(x => x.Name).ToList());
@@ -54,8 +59,8 @@ namespace TosGit.Tasks
                 pastedItem = targetFolder.Items.First(i => i.Name == item.DisplayedName);
                 objectTracker.Add(item.UniqueId, pastedItem.UniqueId);
 
-                var subItems = item.Search("=>Items").ToArray();
-                var copiedSubItems = pastedItem.Search("=>Items").ToArray();
+                var subItems = item.Search("=>SUBPARTS:TCObject").ToArray();
+                var copiedSubItems = pastedItem.Search("=>SUBPARTS:TCObject").ToArray();
                 for (int i = 0; i < subItems.Length; i++)
                 {
                     objectTracker.Add(subItems[i].UniqueId, copiedSubItems[i].UniqueId);

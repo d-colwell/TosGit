@@ -36,6 +36,15 @@
       <HintPath>..\packages\Atlassian.Stash.Api.3.0.0\lib\net45\Atlassian.Stash.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Base">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\TRICENTIS\Tosca Testsuite\ToscaCommander\Base.dll</HintPath>
+    </Reference>
+    <Reference Include="BusinessObjects">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\TRICENTIS\Tosca Testsuite\ToscaCommander\BusinessObjects.dll</HintPath>
+    </Reference>
+    <Reference Include="ModelViewConnector">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\TRICENTIS\Tosca Testsuite\ToscaCommander\ModelViewConnector.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -43,6 +52,9 @@
     <Reference Include="Octokit, Version=0.20.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Octokit.0.20.0\lib\net45\Octokit.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Persistency">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\TRICENTIS\Tosca Testsuite\ToscaCommander\Persistency.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,6 +72,9 @@
       <HintPath>$(TRICENTIS_HOME)\ToscaCommander\TCAPIObjects.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="TOSCACommander">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\TRICENTIS\Tosca Testsuite\ToscaCommander\TOSCACommander.exe</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
@@ -73,7 +88,13 @@
     <Compile Include="Connectors\IRepositoryConnector.cs" />
     <Compile Include="Connectors\IRepository.cs" />
     <Compile Include="Container.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Tasks\ComponentFolder\CopyToBranchTask.cs" />
     <Compile Include="Tasks\JUNK_compareTestsTask.cs" />
     <Compile Include="ObjectTracker\EmbeddedFileObjectTracker.cs" />
@@ -97,7 +118,12 @@
       <Name>Tricentis.TCAPIObjects.ExtensionMethods</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

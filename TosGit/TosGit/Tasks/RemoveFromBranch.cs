@@ -12,7 +12,7 @@ namespace TosGit.Tasks
     {
         public override Type ApplicableType => typeof(TCObject);
 
-        public override string Name => "Remove from Branch";
+        public override string Name => Resources.RemoveFromBranchTaskName;
 
         public override bool IsTaskPossible(TCObject obj)
         {

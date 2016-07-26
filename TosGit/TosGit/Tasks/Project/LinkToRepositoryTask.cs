@@ -12,7 +12,7 @@ namespace TosGit.Tasks.Project
     {
         public override Type ApplicableType => typeof(TCProject);
 
-        public override string Name => "Link To Repository";
+        public override string Name => Resources.LinkTaskName;
 
         public override bool IsTaskPossible(TCObject obj) => true;
 
@@ -38,7 +38,6 @@ namespace TosGit.Tasks.Project
             if (!objectToExecuteOn.GetPropertyNames().Any(p => p == Config.Instance.RepoPasswordProperty))
             {
                 var prop = project.DefaultPropertiesDefinition.CreateProperty();
-                prop.Visible = false;
                 prop.Name = Config.Instance.RepoPasswordProperty;
                 prop.Value = string.Empty;
             }
@@ -63,7 +62,6 @@ namespace TosGit.Tasks.Project
             string currentRepo = project.GetPropertyValue(Config.Instance.RepoNameProperty);
             currentRepo = taskContext.GetStringSelection("Which Repository do you want to connect to?", repositories.Select(x => x.Name).ToList(), currentRepo);
             project.SetAttibuteValue(Config.Instance.RepoNameProperty, currentRepo);
-
             return objectToExecuteOn;
         }
 
@@ -82,7 +80,9 @@ namespace TosGit.Tasks.Project
 
             objectToExecuteOn.SetAttibuteValue(Config.Instance.RepoProperty, repo);
             objectToExecuteOn.SetAttibuteValue(Config.Instance.RepoUserProperty, userName);
+            objectToExecuteOn.DefaultPropertiesDefinition.TypedProperties.First(x => x.Name == Config.Instance.RepoPasswordProperty).Visible = true;
             objectToExecuteOn.SetAttibuteValue(Config.Instance.RepoPasswordProperty, password);
+            objectToExecuteOn.DefaultPropertiesDefinition.TypedProperties.First(x => x.Name == Config.Instance.RepoPasswordProperty).Visible = false;
         }
 
     }
