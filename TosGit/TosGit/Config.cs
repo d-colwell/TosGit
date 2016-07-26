@@ -47,5 +47,7 @@ namespace TosGit
             }
         };
 
+        public string ProjectNameProperty => "ProjectName";
+        public string GitServerProperty => "GitServer";
     }
 }

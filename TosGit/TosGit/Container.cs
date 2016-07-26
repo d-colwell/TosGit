@@ -21,10 +21,16 @@ namespace TosGit
             }
         }
 
-        public IRepositoryConnector GetRepositoryConnector(string url, string username, string password)
+        public IRepositoryConnector GetRepositoryConnector(string gitServer, string url, string username, string password)
         {
             //Decision which repository to use here
-            return new Connectors.GitHub.GitHubRepoConnector(url, username, password);
+            
+            if (gitServer == "GitHub")
+                return new Connectors.GitHub.GitHubRepoConnector(url, username, password);
+            else if (gitServer == "BitBucket")
+                return new Connectors.BitBucket.BitBucketRepositoryConnector(url, username, password);
+            else
+                throw new NotImplementedException();
         }
 
         public ObjectTracker.IObjectTracker GetObjectTracker(TCComponentFolder branchFolder)

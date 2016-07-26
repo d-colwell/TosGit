@@ -20,18 +20,20 @@ namespace TosGit.Connectors.BitBucket
             catch (Exception)
             {
                 //OMNOMNOMNOM tasty exceptions
+                throw new NotImplementedException();
             }
         }
-        public IEnumerable<IBranch> GetRemoteBranches(string repository)
+        public IEnumerable<IBranch> GetRemoteBranches(string project ,string repository )
         {
-            var repo = _client.Repositories.Get(repository).Result.Values.FirstOrDefault();
-            var branches = _client.Branches.Get(repository, repo.Slug).Result.Values;
+            var repo = _client.Repositories.Get(project).Result.Values.Where(x=>x.Name == repository).FirstOrDefault();
+            var branches = _client.Branches.Get(project, repo.Slug).Result.Values;
             return branches.Select(b => new BitBucketBranch(b));
         }
 
-        public IEnumerable<IRepository> GetRepositories()
+        public IEnumerable<IRepository> GetRepositories(string project)
         {
-            throw new NotImplementedException();
+            return _client.Repositories.Get(project).Result.Values.Select(x => new BitBucketRepository(x));
+
         }
 
         public bool TestConnection()

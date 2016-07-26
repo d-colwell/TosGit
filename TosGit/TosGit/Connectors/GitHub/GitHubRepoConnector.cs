@@ -34,13 +34,13 @@ namespace TosGit.Connectors.GitHub
 
         }
 
-        public IEnumerable<IRepository> GetRepositories()
+        public IEnumerable<IRepository> GetRepositories(string project = "")
         {
             var repositories = client.Repository.GetAllForCurrent().Result;
             return repositories.Select(x => new GitHubRepository(x));
         }
 
-        public IEnumerable<IBranch> GetRemoteBranches(string repository)
+        public IEnumerable<IBranch> GetRemoteBranches(string project, string repository)
         {
             var branches = client.Repository.GetAllBranches(client.Credentials.Login, repository).Result;
             return branches.Select(b => new GitHubBranch(b));
