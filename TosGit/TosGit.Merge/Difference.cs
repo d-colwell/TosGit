@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TosGit.Merge
+﻿namespace TosGit.Merge
 {
     public class Difference
     {

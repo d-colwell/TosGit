@@ -96,7 +96,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Tasks\ComponentFolder\CopyToBranchTask.cs" />
-    <Compile Include="Tasks\JunkCompareTestsTask.cs" />
     <Compile Include="ObjectTracker\EmbeddedFileObjectTracker.cs" />
     <Compile Include="ObjectTracker\IObjectTracker.cs" />
     <Compile Include="Tasks\RemoveFromBranch.cs" />

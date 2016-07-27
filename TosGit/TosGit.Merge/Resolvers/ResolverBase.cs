@@ -1,4 +1,4 @@
-﻿namespace TosGit.MergeUI.Resolvers
+﻿namespace TosGit.Merge.Resolvers
 {
     public abstract class ResolverBase<T>
     {

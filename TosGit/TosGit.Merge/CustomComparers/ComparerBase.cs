@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TosGit.MergeUI.CustomComparers
+namespace TosGit.Merge.CustomComparers
 {
     public abstract class ComparerBase
     {
@@ -12,6 +12,8 @@ namespace TosGit.MergeUI.CustomComparers
             ApplicableTypes = applicableTypes;
             NameToDisplay = nameToDisplay;
         }
+
+        public string NameToDisplay { get; set; }
 
         public virtual Type[] ApplicableTypes { get; }
 

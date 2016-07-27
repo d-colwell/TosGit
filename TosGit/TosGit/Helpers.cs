@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit
@@ -11,11 +7,13 @@ namespace TosGit
     {
         public static TCProject GetProject(this TCObject src)
         {
-            if (src is TCProject)
-                return src as TCProject;
+            var project = src as TCProject;
+            if (project != null)
+                return project;
             else
                 return src.Search("=>SUPERPART:TCProject").First() as TCProject;
         }
+
         /// <summary>
         /// Finds the parent of this object which is a branch component folder.
         /// </summary>
@@ -23,7 +21,7 @@ namespace TosGit
         /// <returns>Branch Folder, or Null if none found</returns>
         public static TCComponentFolder GetParentBranch(this TCObject src)
         {
-            var branchParents = src.Search("=>SUPERPART:TCComponentFolder[OriginBranch != \"\"]");
+            var branchParents = src.Search($"=>SUPERPART:TCComponentFolder[OriginBranch != \"\"]");
             if (!branchParents.Any())
                 return null;
             else
@@ -38,7 +36,7 @@ namespace TosGit
         /// <returns></returns>
         public static TCObject FindChildByID(this TCObject parent, string uniqueID)
         {
-            return parent.Search(string.Format("=>SUBPARTS[(UniqueId==\"{0}\")]", uniqueID)).FirstOrDefault();
+            return parent.Search($"=>SUBPARTS[(UniqueId==\"{uniqueID}\")]").FirstOrDefault();
         }
     }
 }
