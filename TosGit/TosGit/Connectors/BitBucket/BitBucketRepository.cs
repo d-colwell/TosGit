@@ -19,17 +19,5 @@ namespace TosGit.Connectors.BitBucket
             }
         }
 
-        string IRepository.Name
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
 }
