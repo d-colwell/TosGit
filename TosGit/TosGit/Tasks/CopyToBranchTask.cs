@@ -16,10 +16,7 @@ namespace TosGit.Tasks
 
         public override bool IsTaskPossible(TCObject obj)
         {
-            if (obj is TCProject || obj is TCFolder)
-                return false;
-
-            return true;
+            return !(obj is TCProject) && !(obj is TCFolder);
         }
 
         public override TCObject Execute(TCObject objectToExecuteOn, TCAddOnTaskContext taskContext)
@@ -39,18 +36,22 @@ namespace TosGit.Tasks
             }
             var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
 
-            string toBranch = context.GetStringSelection("Select a branch", branches.Select(x => x.Name).ToList());
+            var ownedItems = branches as OwnedItem[] ?? branches.ToArray();
+            string toBranch = context.GetStringSelection("Select a branch", ownedItems.Select(x => x.Name).ToList());
 
-            TCComponentFolder branchDestinationFolder = branches.First(x => x.Name == toBranch) as TCComponentFolder;
+            TCComponentFolder branchDestinationFolder = ownedItems.First(x => x.Name == toBranch) as TCComponentFolder;
             var objectTracker = Container.Instance.GetObjectTracker(branchDestinationFolder);
 
             foreach (var item in objs)
             {
-                var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
-                if (existingItems.Any())
+                if (branchDestinationFolder != null)
                 {
-                    context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
-                    continue;
+                    var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
+                    if (existingItems.Any())
+                    {
+                        context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
+                        continue;
+                    }
                 }
                 var targetFolder = CopyFolderStructure(branchDestinationFolder, item);
                 TCObject pastedItem = null;
@@ -66,7 +67,7 @@ namespace TosGit.Tasks
                     objectTracker.Add(subItems[i].UniqueId, copiedSubItems[i].UniqueId);
                 }
 
-                if (!pastedItem.GetPropertyNames().Any(p => p == Config.Instance.SourceItemProperty))
+                if (pastedItem.GetPropertyNames().All(p => p != Config.Instance.SourceItemProperty))
                 {
                     pastedItem.DefaultPropertiesDefinition.CreateProperty().Name = Config.Instance.SourceItemProperty;
                 }
@@ -85,8 +86,12 @@ namespace TosGit.Tasks
         private TCProject FindProject(TCObject tcObject)
         {
             TCFolder folder = tcObject.OwningObject.ParentFolder as TCFolder;
-            while (folder.ParentFolder != null)
-                folder = folder.ParentFolder as TCFolder;
+            if (folder != null)
+            {
+                while (folder != null && folder.ParentFolder != null)
+                    folder = folder.ParentFolder as TCFolder;
+            }
+
             return folder.Project as TCProject;
         }
 
@@ -103,9 +108,8 @@ namespace TosGit.Tasks
             do
             {
                 structure.Push(currentFolder);
-                currentFolder = currentFolder.ParentFolder as TCFolder;
-            }
-            while (currentFolder != null && !(currentFolder is TCComponentFolder));
+                currentFolder = currentFolder?.ParentFolder as TCFolder;
+            } while (currentFolder != null && !(currentFolder is TCComponentFolder));
 
             TCFolder newRoot = null;
             while (structure.Count > 0)
@@ -121,9 +125,10 @@ namespace TosGit.Tasks
             TCFolder resultFolder = root.Items.FirstOrDefault(i => i is TCFolder && i.Name == folder.Name) as TCFolder;
             if (resultFolder != null)
                 return resultFolder;
-            if (root is TCComponentFolder)
+            var componentFolder = root as TCComponentFolder;
+            if (componentFolder != null)
             {
-                var cf = root as TCComponentFolder;
+                var cf = componentFolder;
                 if (folder.PossibleContent.Contains("TestCase"))
                     resultFolder = cf.CreateTestCasesFolder();
                 else if (folder.PossibleContent.Contains("Module"))

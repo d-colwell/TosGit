@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TosGit.MergeUI.CustomComparers;
 using Tricentis.TCAPIObjects.Objects;
 

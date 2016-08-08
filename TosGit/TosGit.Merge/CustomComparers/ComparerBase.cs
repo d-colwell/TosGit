@@ -13,6 +13,8 @@ namespace TosGit.MergeUI.CustomComparers
             NameToDisplay = nameToDisplay;
         }
 
+        public string NameToDisplay { get; set; }
+
         public virtual Type[] ApplicableTypes { get; }
 
     }

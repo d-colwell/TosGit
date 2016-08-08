@@ -25,12 +25,9 @@ namespace TosGit.Connectors.BitBucket
         public IEnumerable<IBranch> GetRemoteBranches(string project ,string repository )
         {
             var repo = _client.Repositories.Get(project).Result.Values.FirstOrDefault(x => x.Name == repository);
-            if (repo != null)
-            {
-                var branches = _client.Branches.Get(project, repo.Slug).Result.Values;
-                return branches.Select(b => new BitBucketBranch(b));
-            }
-            return null;
+            if (repo == null) return null;
+            var branches = _client.Branches.Get(project, repo.Slug).Result.Values;
+            return branches.Select(b => new BitBucketBranch(b));
         }
 
         public IEnumerable<IRepository> GetRepositories(string project)
@@ -41,9 +38,7 @@ namespace TosGit.Connectors.BitBucket
 
         public bool TestConnection()
         {
-            if (_client == null)
-                return false;
-            return true;
+            return _client != null;
         }
     }
 }
