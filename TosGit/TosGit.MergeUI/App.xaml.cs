@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace TosGit.MergeUI
+namespace TosGit.Merge
 {
     /// <summary>
     /// Interaction logic for App.xaml

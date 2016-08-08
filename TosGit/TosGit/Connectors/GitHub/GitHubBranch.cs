@@ -10,12 +10,6 @@ namespace TosGit.Connectors.GitHub
         {
             this._branch = branch;
         }
-        public string Name
-        {
-            get
-            {
-                return _branch.Name;
-            }
-        }
+        public string Name => _branch.Name;
     }
 }

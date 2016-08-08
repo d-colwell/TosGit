@@ -2,6 +2,6 @@
 {
     public interface IRepository
     {
-        string Name { get; set; }
+        string Name { get;  }
     }
 }

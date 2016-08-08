@@ -1,25 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tricentis.TCAPIObjects.Objects;
 
 namespace TosGit.Merge
 {
     public class Comparer
     {
-        private readonly MergeConfig config;
+        private readonly MergeConfig _config;
 
         public Comparer(MergeConfig config)
         {
-            this.config = config;
+            this._config = config;
         }
 
         public ComparisonResult Compare(TCObject unmodified, TCObject modified)
         {
             var type = unmodified.GetType();
-            var mergeType = config.MergeTypes.FirstOrDefault(mt => mt.TypeName == type.Name);
+            var mergeType = _config.MergeTypes.FirstOrDefault(mt => mt.TypeName == type.Name);
 
             var comparResult = new ComparisonResult("Test Case", type);
             var properties = type.GetProperties()
@@ -28,7 +25,7 @@ namespace TosGit.Merge
                             p.PropertyType == typeof(DateTime) ||
                             p.PropertyType == typeof(decimal) ||
                             p.PropertyType.IsEnum)
-                .Where(p => mergeType.IncludedProperties.Any(ip => ip.PropertyPath == p.Name));
+                .Where(p => { return mergeType?.IncludedProperties.Any(ip => ip.PropertyPath == p.Name) ?? false; });
 
             foreach (var property in properties)
             {

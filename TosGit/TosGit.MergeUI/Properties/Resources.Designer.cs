@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TosGit.MergeUI.Properties {
+namespace TosGit.Merge.Properties {
     using System;
     
     
