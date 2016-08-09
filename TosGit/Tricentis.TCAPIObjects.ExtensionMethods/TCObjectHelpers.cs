@@ -22,8 +22,9 @@ namespace Tricentis.TCAPIObjects.Objects
 
         public static TCProject GetProject(this TCObject self)
         {
-            if (self is TCProject)
-                return (TCProject) self;
+            var project = self as TCProject;
+            if (project != null)
+                return project;
             if (self.OwningObject?.ParentFolder == null)
                 return null;
             TCFolder parentFolder = self.OwningObject.ParentFolder as TCFolder;

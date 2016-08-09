@@ -10,7 +10,7 @@ namespace TosGit.Connectors.BitBucket
         {
             this._branch = branch;
         }
-
+        // Changed from a GET into a single function call to the Branch ID.
         public string Name => _branch.DisplayId;
     }
 }

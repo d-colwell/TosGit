@@ -8,24 +8,24 @@ namespace TosGit.ObjectTracker
 {
     class EmbeddedFileObjectTracker : IObjectTracker
     {
-        private readonly string filePath;
-        private readonly TCComponentFolder folder;
-        private IDictionary<string, string> sourceObjects;
-        private IDictionary<string, string> newObjects;
+        private readonly string _filePath;
+        private readonly TCComponentFolder _folder;
+        private readonly IDictionary<string, string> _sourceObjects;
+        private readonly IDictionary<string, string> _newObjects;
         public EmbeddedFileObjectTracker(TCComponentFolder componentFolder)
         {
-            this.folder = componentFolder;
-            this.sourceObjects = new Dictionary<string, string>();
-            this.newObjects = new Dictionary<string, string>();
+            this._folder = componentFolder;
+            this._sourceObjects = new Dictionary<string, string>();
+            this._newObjects = new Dictionary<string, string>();
 
-            this.filePath = Path.Combine(Path.GetTempPath(), Config.Instance.TrackingFileName);
-            if (!componentFolder.AttachedFiles.Any(x => x.Name == Config.Instance.TrackingFileName))
+            this._filePath = Path.Combine(Path.GetTempPath(), Config.Instance.TrackingFileName);
+            if (componentFolder.AttachedFiles.All(x => x.Name != Config.Instance.TrackingFileName))
             {
-                using (var fStream = File.CreateText(filePath))
+                using (var fStream = File.CreateText(_filePath))
                 {
 
                 }
-                componentFolder.AttachFile(filePath, "Embedded");
+                componentFolder.AttachFile(_filePath, "Embedded");
             }
             else
             {
@@ -41,56 +41,57 @@ namespace TosGit.ObjectTracker
         }
         public void Add(string sourceObject, string newObject, bool overrideExistingLinks = false)
         {
-            if (sourceObjects.ContainsKey(sourceObject))
+            if (_sourceObjects.ContainsKey(sourceObject))
             {
-                if (sourceObjects[sourceObject] == newObject)
+                if (_sourceObjects[sourceObject] == newObject)
                     return; //avoid creating duplicates
                 else if (overrideExistingLinks)
                 {
-                    sourceObjects.Remove(sourceObject);
-                    if (newObjects.ContainsKey(newObject))
-                        newObjects.Remove(newObject);
+                    _sourceObjects.Remove(sourceObject);
+                    if (_newObjects.ContainsKey(newObject))
+                        _newObjects.Remove(newObject);
                 }
                 else
-                    throw new InvalidOperationException(string.Format("Source object {0} is already linked to object {1}", sourceObject, newObject));
+                    throw new InvalidOperationException(
+                        $"Source object {sourceObject} is already linked to object {newObject}");
             }
-            sourceObjects.Add(new KeyValuePair<string, string>(sourceObject, newObject));
-            newObjects.Add(newObject, sourceObject);
+            _sourceObjects.Add(new KeyValuePair<string, string>(sourceObject, newObject));
+            _newObjects.Add(newObject, sourceObject);
         }
 
         public string GetNewObject(string sourceObject)
         {
-            return sourceObjects[sourceObject];
+            return _sourceObjects[sourceObject];
         }
 
         public string GetSourceObject(string newObject)
         {
-            return newObjects[newObject];
+            return _newObjects[newObject];
         }
 
         public bool HasSourceObject(string newObject)
         {
-            return sourceObjects.ContainsKey(newObject);
+            return _sourceObjects.ContainsKey(newObject);
         }
 
         public void Commit()
         {
-            if (File.Exists(filePath))
-                File.Delete(filePath);
-            using (var fStream = File.CreateText(filePath))
+            if (File.Exists(_filePath))
+                File.Delete(_filePath);
+            using (var fStream = File.CreateText(_filePath))
             {
-                foreach (var record in sourceObjects)
+                foreach (var record in _sourceObjects)
                 {
-                    fStream.Write(string.Format("{0},{1}{2}", record.Key, record.Value, Environment.NewLine));
+                    fStream.Write($"{record.Key},{record.Value}{Environment.NewLine}");
                 }
             }
-            foreach (var attachedFile in folder.AttachedFiles.Where(x => x.Name == Config.Instance.TrackingFileName))
+            foreach (var attachedFile in _folder.AttachedFiles.Where(x => x.Name == Config.Instance.TrackingFileName))
             {
                 var continueOnWarning = MsgBoxResult_OkCancel.Ok;
                 var deleteConfirm = MsgBoxResult_YesNo.Yes;
                 attachedFile.Delete(continueOnWarning, deleteConfirm);
             }
-            folder.AttachFile(filePath, "Embedded");
+            _folder.AttachFile(_filePath, "Embedded");
         }
     }
 }

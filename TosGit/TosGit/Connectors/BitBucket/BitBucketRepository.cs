@@ -11,13 +11,7 @@ namespace TosGit.Connectors.BitBucket
         {
             this._repository = repository;
         }
-        public string Name
-        {
-            get
-            {
-                return _repository.Name;
-            }
-        }
-
+        // Changed from a GET into a single function call to the Repo Name.
+        public string Name => _repository.Name;
     }
 }

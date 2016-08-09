@@ -11,7 +11,7 @@ namespace TosGit.Connectors.GitHub
         {
             this._repository = repo;
         }
-
+        // Changed from a GET into a single function call to the Repo Name.
         public string Name => _repository.Name;
 
     }

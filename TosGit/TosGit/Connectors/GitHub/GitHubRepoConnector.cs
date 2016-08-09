@@ -21,9 +21,8 @@ namespace TosGit.Connectors.GitHub
         {
             try
             {
-                if (GetRepositories().Any())
-                    return true;
-                return false;
+                // IF statement did not give optimized code at this level. Converted to single return of the Array for both TRUE or FALSE
+                return GetRepositories().Any();
             }
             catch (Exception)
             {

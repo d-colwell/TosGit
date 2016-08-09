@@ -44,10 +44,12 @@ namespace TosGit.Tasks
             {
                 if (branchDestinationFolder != null)
                 {
-                    var existingItems = branchDestinationFolder.Search(string.Format("=>SUBPARTS[(SourceItemID==\"{0}\")]", item.UniqueId));
+                    var existingItems = branchDestinationFolder.Search(
+                        $"=>SUBPARTS[(SourceItemID==\"{item.UniqueId}\")]");
                     if (existingItems.Any())
                     {
-                        context.ShowWarningMessage("Duplicate Item", string.Format("Item {0} already exists in branch. This item was skipped", item.DisplayedName));
+                        context.ShowWarningMessage("Duplicate Item",
+                            $"Item {item.DisplayedName} already exists in branch. This item was skipped");
                         continue;
                     }
                 }
@@ -171,6 +173,5 @@ namespace TosGit.Tasks
                     step.AssignModuleToTestStep(moduleReferences[step.Module.UniqueId]);
             }
         }
-
     }
 }

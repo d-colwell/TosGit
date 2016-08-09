@@ -30,7 +30,10 @@ namespace TosGit.Tasks.ComponentFolder
             var project = FindProject(objs.First());
             var propertyDefinitions = project.DefaultPropertiesDefinition;
             var branchesFolder = project.Items.First(i => i is TCComponentFolder && i.Name == Config.Instance.BranchFolderName) as TCComponentFolder;
-            if (branchesFolder != null)
+
+            // Inverted IF statement to reduce the nesting below.
+            if (branchesFolder == null) return objs.FirstOrDefault();
+
             {
                 var branches = branchesFolder.Items.Where(i => i is TCComponentFolder && i.GetPropertyNames().Any(pn => pn == Config.Instance.BranchPropertyName));
 
@@ -111,9 +114,10 @@ namespace TosGit.Tasks.ComponentFolder
             TCFolder resultFolder = root.Items.FirstOrDefault(i => i is TCFolder && i.Name == folder.Name) as TCFolder;
             if (resultFolder != null)
                 return resultFolder;
-            if (root is TCComponentFolder)
+            var componentFolder = root as TCComponentFolder;
+            if (componentFolder != null)
             {
-                var cf = root as TCComponentFolder;
+                var cf = componentFolder    ;
                 if (folder.PossibleContent.Contains("TestCase"))
                     resultFolder = cf.CreateTestCasesFolder();
                 else if (folder.PossibleContent.Contains("Module"))
